@@ -18,4 +18,4 @@ ssh-keygen -A
 
 # Request SSL key
 openssl req -newkey rsa:2048 -nodes -subj "/C=SP/L=Madrid/O=42" \
--keyout /etc/ssl/private/mzomeno-.key -out /etc/ssl/certs/mzomeno-.crt
+-keyout /etc/ssl/private/admin.key -out /etc/ssl/certs/admin.crt
