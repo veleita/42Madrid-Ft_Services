@@ -13,4 +13,4 @@ RUN chmod 644 /var/www/localhost/index.html
 EXPOSE 22 80 443
 
 # Start ssh and run nginx
-CMD nginx -g "daemon off;"
+CMD /usr/sbin/sshd; nginx -g "daemon off;"
