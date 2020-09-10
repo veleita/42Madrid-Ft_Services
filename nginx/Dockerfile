@@ -1,11 +1,13 @@
-FROM alpine:latest
+FROM alpine:3.12
 
-LABEL maintainer="Maria Zomeño https://github.com/veleita/veleita"
+LABEL maintainer="Maria Zomeño https://github.com/veleita"
 
 # Install
 COPY srcs/install.sh /tmp/install.sh
+RUN chmod +x /tmp/install.sh && sh /tmp/install.sh
+
 COPY srcs/nginx.conf /etc/nginx/nginx.conf
-RUN sh /tmp/install.sh
+
 COPY srcs/index.html /var/www/localhost/index.html
 RUN chmod 644 /var/www/localhost/index.html
 
