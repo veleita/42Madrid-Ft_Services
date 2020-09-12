@@ -10,7 +10,7 @@ echo mzomeno-:ftpsswrd | chpasswd
 echo mzomeno- >> /etc/vsftpd.chroot_list
 
 # Request SSL key
-openssl req -x509 -newkey rsa:2048 -nodes \
+openssl req -x509 -newkey rsa:2048 -days 30 -nodes \
 -subj "/C=SP/L=Madrid/O=42" \
 -keyout /etc/ssl/private/mzomeno-.key \
 -out /etc/ssl/certs/mzomeno-.crt
