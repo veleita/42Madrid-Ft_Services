@@ -20,8 +20,8 @@ mkdir -p /etc/vsftpd
 cat <<EOF >> /etc/vsftpd/vsftpd.conf
 seccomp_sandbox=NO
 pasv_enable=YES
-pasv_min_port=2121
-pasv_max_port=2122
+pasv_min_port=32121
+pasv_max_port=32122
 pasv_address=0.0.0.0
 local_enable=YES
 write_enable=YES
