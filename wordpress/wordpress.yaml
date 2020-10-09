@@ -6,12 +6,17 @@ metadata:
     app: wordpress
 spec:
   ports:
-    - port: 5050
+      - name: wordpress
+        port: 5050
+        protocol: TCP
+#       targetPort: 5050
   selector:
     app: wordpress
     tier: frontend
   type: LoadBalancer
+# LoadBalancerIP:
 ---
+# OPTIONAL
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -32,12 +37,13 @@ metadata:
   labels:
     app: wordpress
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: wordpress
       tier: frontend
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -49,17 +55,15 @@ spec:
         name: wordpress
         ports:
         - containerPort: 5050
-        env:
-        - name: wordpress_host
-          value: wordpress-mysql
-        - name: WORDPRESS_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-pass
-              key: password
-        ports:
-        - containerPort: 80
-          name: wordpress
+#        env:
+#        - name: wordpress_host
+#          value: wordpress-mysql
+#        - name: WORDPRESS_DB_PASSWORD
+#          valueFrom:
+#            secretKeyRef:
+#              name: mysql-pass
+#              key: password
+#          name: wordpress
         volumeMounts:
         - name: wordpress-persistent-storage
           mountPath: /var/www/html

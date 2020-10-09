@@ -1,7 +1,5 @@
 FROM alpine:3.12
 
-COPY srcs/wp-config.php /var/www/localhost/wordpress/wp-config.php
-
 EXPOSE 5050
 
 RUN apk update \
@@ -13,9 +11,12 @@ php7-json \
 php7-opcache \
 php7-mysqli \
 php7-mbstring \
-&& mkdir -p /usr/share/webapps/ \
-&& cd /usr/share/webapps/ \
+&& mkdir -p /var/www/wordpress/ \
+&& cd /var/www/wordpress/ \
 && wget https://wordpress.org/latest.tar.gz \
 && tar -xzvf latest.tar.gz \
-&& rm latest.tar.gz \
-&& ln -s /usr/share/webapps/wordpress/ /var/www/localhost/wordpress/
+&& rm latest.tar.gz
+
+COPY srcs/wp-config.php /var/www/wordpress/wp-config.php
+
+CMD php -S 0.0.0.0:5050 -t /var/www/wordpress
