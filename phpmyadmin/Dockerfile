@@ -2,6 +2,8 @@ FROM alpine:3.12
 
 LABEL maintainer="Maria Zomeño https://github.com/veleita"
 
+EXPOSE 5000
+
 RUN apk update \
 && apk add \
 php7-common \
@@ -32,6 +34,6 @@ php7-dom \
 && mv phpMyAdmin-5.0.2-all-languages phpmyadmin \
 && chmod -R 777 /var/www/
 
-EXPOSE 5000
+COPY srcs/config.inc.php /var/www/phpmyadmin/config.inc.php
 
-CMD php -S 0.0.0.0:5000 -t /var/www
+CMD php -S 0.0.0.0:5000 -t /var/www/phpmyadmin
