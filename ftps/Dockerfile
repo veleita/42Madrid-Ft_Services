@@ -3,12 +3,12 @@ FROM	alpine:3.12
 LABEL	maintainer="Maria Zomeño https://github.com/veleita"
 
 ENV	\
-		FTPS_PASSWORD=default
+FTPS_USER=ftps \
+FTPS_PASSWORD=default
 
 COPY	srcs/config.sh /tmp/config.sh
 
-RUN \
-		apk update && \
+RUN 	apk update && \
 		apk add openssl vsftpd && \
 \
 		addgroup -S ftps && \
@@ -21,8 +21,8 @@ RUN \
 		-out /etc/ssl/certs/self_signed.crt && \
 \
 		tail -n 1 /etc/passwd >> /etc/vsftpd.chroot_list && \
-		chmod +x /tmp/config.sh && sh /tmp/config.sh && \
+		chmod +x /tmp/config.sh && sh /tmp/config.sh
 
-EXPOSE 21 32121
+EXPOSE	 21 32121
 
-CMD /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+CMD 	/usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf

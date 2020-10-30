@@ -41,4 +41,3 @@ spec:
         - containerPort: 80
         - containerPort: 443
         - containerPort: 22
-      imagePullPolicy: Never

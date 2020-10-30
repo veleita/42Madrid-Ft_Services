@@ -7,23 +7,22 @@ metadata:
 spec:
   ports:
       - name: wordpress
-        port: 5050
         protocol: TCP
-#       targetPort: 5050
+        port: 5050
   selector:
     app: wordpress
     tier: frontend
   type: LoadBalancer
-# LoadBalancerIP:
 ---
 # OPTIONAL
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: wp-pv-claim
+  name: wordpress-storage
   labels:
     app: wordpress
 spec:
+  storageClassName: wordpress
   accessModes:
     - ReadWriteOnce
   resources:
@@ -50,24 +49,15 @@ spec:
         app: wordpress
         tier: frontend
     spec:
-      containers:
-      - image: wordpress
-        name: wordpress
-        ports:
-        - containerPort: 5050
-#        env:
-#        - name: wordpress_host
-#          value: wordpress-mysql
-#        - name: WORDPRESS_DB_PASSWORD
-#          valueFrom:
-#            secretKeyRef:
-#              name: mysql-pass
-#              key: password
-#          name: wordpress
-        volumeMounts:
-        - name: wordpress-persistent-storage
-          mountPath: /var/www/html
       volumes:
       - name: wordpress-persistent-storage
         persistentVolumeClaim:
-          claimName: wp-pv-claim
+          claimName: wordpress-storage
+      containers:
+      - name: wordpress
+        image: mzomeno-wordpress
+        ports:
+        - containerPort: 5050
+          volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
