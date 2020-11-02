@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# CUTE COLORS OMG
+# VARIABLES #
+# --------- #
+
+# Colors
 turquoise=$'\e[38;5;73m'
 violet=$'\e[38;5;147m'
 yellow=$'\e[38;5;229m'
@@ -17,8 +20,15 @@ red=$'\e[38;5;124m'
 # Ensure USER variabe is set
 [ -z "${USER}" ] && export USER=$(whoami)
 
-# PATHS
-InstallPath=/sgoinfre/students/$USER/bin/
+# Paths
+export INSTALL_PATH=/sgoinfre/students/$USER/bin/
+export PATH=$PATH:$InstallPath
+export MINIKUBE_HOME=/sgoinfre/students/$USER/
+export SETUP_PATH=$(pwd)
+
+
+#  VERBOSE  #
+# --------- #
 
 # A little presentation
 echo "${white}Hey there! 👋" && sleep 0.5
@@ -31,25 +41,33 @@ sleep 0.5 && echo ""
 
 echo "${white}We are about to install the following set of services:"
 echo "	=> ${red}FTPS${white}"
-echo "	=> ${green}Nginx${white} with ${green}ssh${white}"
-echo "	=> ${blue}Wordpress${white} with ${blue}Mariadb${white} and ${blue}phpmyadmin${white}"
-echo "	=> ${lilac}Influxdb${white} with ${lilac}Telegraf${white} and ${lilac}Grafana"
-echo "${white}into a ${turquoise}Kubernetes ${white}single-node cluster provided by ${grey}Minikube"
-sleep 1 && echo ""
+echo "	=> ${green}Nginx${white} with SSH"
+echo "	=> ${blue}Wordpress${white} with Mariadb and phpmyadmin"
+echo "	=> ${lilac}Influxdb${white} with Telegraf and Grafana"
+echo "${white}into a ${turquoise}Kubernetes ${white}single-node cluster provided by ${turquoise}Minikube"
+echo ""
+
+read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
+echo ""
 
 # Disclaimers
-echo "⚠️  ${white}This project has only been testing on ${yellow}darwin18.0${white}"
+echo "⚠️  ${white}This project has only been tested on ${yellow}darwin18.0${white} and will be set up to run"
+echo "on a 42Network environment."
 echo ""
-echo "It will require you to have ${blue}Docker${white} installed and running on your machine."
-echo "Consider running the ${violet}init_docker ${white}script for this ${violet}in case you are on a"
-echo "42Network environment${white}"
+echo "📦 It will require you to have ${blue}Docker${white} and ${turquoise}VirtualBox${white} installed on your machine."
 echo ""
-echo "You will also need to have at least ${turquoise}Kubectl, ${ocean}VirtualBox ${white}and ${grey}Minikube"
-echo "${white}installed on your machine."
-echo "Consider running the ${violet}install_dependencies ${white}script for this ${violet}in case you are"
-echo "on a 42Network environment${white}"
-echo "" && sleep 1
+echo "💿 Please make sure that you have enough free space on your disk (${salmon}around 2G${white}"
+echo "should be fine) so that the installation completes correctly"
+echo ""
 
+read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
+echo ""
+
+
+#   SETUP   #
+# --------- #
+
+# Installation
 if [ ! -d /Applications/VirtualBox.app ] && \
 	[ ! -d ~/Applications/VirtualBox.app ]; then
 		echo " 👎 -- ${ocean}VirtualBox ${white} doesn't seem to be installed on your machine."
@@ -79,7 +97,7 @@ fi
 
 if [ ! -h /Users/$USER/.brew/bin/minikube ] && \
 	[ ! -x /sgoinfre/students/$USER/*/minikube ]; then
-	cd $InstallPath && \
+	cd $INSTALL_PATH && \
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 && \
 	chmod +x minikube && \
 	echo "  👍 -- ${grey}Minikube${white} installed"
@@ -88,26 +106,23 @@ fi
 
 if [ ! -h /Users/$USER/.brew/bin/kubectl ] && \
 	[ ! -x /sgoinfre/students/$USER/*/kubectl ]; then
-	cd $InstallPath
+	cd $INSTALL_PATH
 	curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl" && \
 	chmod +x ./kubectl && \
 	echo "  👍 -- ${turquoise}Kubectl${white} installed"
 	echo ""
 fi
 
-####ADD SGOINFRE TO PATH!!
 
 ## MINIKUBE
-#-------------------------------------------------------
 echo -e "${grey}Minikube"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 echo "${white}"
 
-# Delete minikube cluster in case it existed
-minikube delete 2> /dev/null
-
-# Start cluster
-minikube start --driver=virtualbox
+# Restart "42services" cluster on VirtualBox driver
+minikube config set profile 42services
+minikube config set driver virtualbox
+minikube start
 
 # Import Docker daemon to the cluster
 #### ADD TO README [https://stackoverflow.com/questions/52310599/what-does-minikube-docker-env-mean]
@@ -121,7 +136,7 @@ echo ""
 #-------------------------------------------------------
 echo -e "${green}MetalLB${white}"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-sleep 0.3 && echo "${white}"
+sleep 1 && echo "${white}"
 
 kubectl get configmap kube-proxy -n kube-system -o yaml | \
 sed -e "s/strictARP: false/strictARP: true/" | \
@@ -130,38 +145,37 @@ kubectl apply -f - -n kube-system 2> /dev/null
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
 kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
-kubectl apply -f metallb/config.yaml
+kubectl apply -f srcs/metallb/config.yaml
+
 echo ""
 
-echo -e "${blue}Docker Build"
-for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-sleep 0.3 && echo "${white}"
 
-echo "${green}Building NGINX image"
+## DOCKER
+echo -e "${blue}Docker containers"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-echo "${white}"
-docker build -t mzomeno-nginx nginx #&> /dev/null
-echo ""
-echo "${salmon}Building MYSQL image"
+sleep 1 && echo "${white}"
+docker build -t mzomeno-nginx srcs/nginx/
+docker build -t mzomeno-mysql srcs/mysql/
+docker build -t mzomeno-ftps srcs/ftps/
+docker build -t mzomeno-wordpress srcs/wordpress/
+docker build -t mzomeno-phpmyadmin srcs/phpmyadmin/
+
+
+## KUBERNETES
+echo -e "${turquoise}Kubernetes objects"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-echo "${white}"
-docker build -t mzomeno-mysql mysql #&> /dev/null
-echo ""
-echo "${red}Building FTPS image"
-for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-echo "${white}"
-docker build -t mzomeno-ftps ftps #&> /dev/null
-echo ""
-echo "${ocean}Building PHPMYADMIN image"
-for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-echo "${white}"
-docker build -t mzomeno-phpmyadmin phpmyadmin #&> /dev/null
-echo ""
-echo "${blue}Building WORDPRESS image"
-for i in {1..28}; do sleep 0.02 && echo -n "-"; done
-echo "${white}"
-docker build -t mzomeno-wordpress wordpress #&> /dev/null
-echo ""
-#docker build -t my-grafana srcs/grafana &> /dev/null
-#docker build -t my-influxdb srcs/influxdb &> /dev/null
-#docker build -t my-telegraf srcs/telegraf &> /dev/null
+sleep 1 && echo "${white}"
+kubectl apply -f srcs/nginx/nginx.yaml
+kubectl apply -f srcs/mysql/mysql.yaml
+kubectl apply -f srcs/ftps/ftps.yaml
+kubectl apply -f srcs/phpmyadmin/phpmyadmin.yaml
+kubectl apply -f srcs/wordpress/wordpress.yaml
+#kubectl apply -f ../services/grafana/grafana.yaml
+#kubectl apply -f ../services/influxdb/influxdb.yaml
+#kubectl apply -f ../services/telegraf/telegraf.yaml
+
+
+## FINISH
+minikube ip
+kubectl get svc
+minikube delete 2> /dev/null

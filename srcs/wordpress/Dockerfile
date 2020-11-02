@@ -8,7 +8,6 @@ php7 \
 php7-common \
 php7-fpm \
 php7-json \
-php7-opcache \
 php7-mysqli \
 php7-mbstring \
 && mkdir -p /var/www/wordpress/ \
