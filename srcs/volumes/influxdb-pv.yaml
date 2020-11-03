@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: influxdb-pv
+  labels:
+    type: local
+spec:
+  storageClassName: influxdb
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/var/lib/influxdb"
