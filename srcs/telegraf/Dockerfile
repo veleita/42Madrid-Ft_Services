@@ -13,6 +13,7 @@ RUN 	apk update && \
 		rm -rf telegraf-1.15.2_linux_amd64.tar.gz && \
 		rm -rf telegraf-1.15.2
 
+COPY	srcs/telegraf.conf /etc/telegraf/telegraf.conf
 WORKDIR	/usr/bin
 
 #ENTRYPOINT	["./telegraf"]

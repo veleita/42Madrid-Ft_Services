@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: telegraf
+  name: telegraf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegraf
+  template:
+    metadata:
+      labels:
+        app: telegraf
+    spec:
+# Expose the Docker Unix socket by mapping the socket into the pod as a volume
+# and then mounting that volume to /var/run/docker.sock
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+      containers:
+      - image: mzomeno-telegraf
+        imagePullPolicy: Never
+        name: telegraf
+        volumeMounts:
+          - name: docker-socket
+            mountPath: /var/run/docker.sock
