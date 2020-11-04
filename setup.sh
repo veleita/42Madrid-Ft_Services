@@ -54,7 +54,7 @@ echo ""
 echo "⚠️  ${white}This project has only been tested on ${yellow}darwin18.0${white} and will be set up to run"
 echo "on a 42Network environment."
 echo ""
-echo "📦 It will require you to have ${blue}Docker${white} and ${turquoise}VirtualBox${white} installed on your machine."
+echo "📦 It will require you to have ${blue}Docker${white} and ${ocean}VirtualBox${white} installed on your machine."
 echo ""
 echo "💿 Please make sure that you have enough free space on your disk (${salmon}around 2G${white}"
 echo "should be fine) so that the installation completes correctly"
@@ -100,7 +100,7 @@ if [ ! -h /Users/$USER/.brew/bin/minikube ] && \
 	cd $INSTALL_PATH && \
 	curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 && \
 	chmod +x minikube && \
-	echo "  👍 -- ${grey}Minikube${white} installed"
+	echo "  👍 -- ${turquoise}Minikube${white} installed"
 	echo ""
 fi
 
@@ -126,7 +126,7 @@ minikube start
 
 # Import Docker daemon to the cluster
 #### ADD TO README [https://stackoverflow.com/questions/52310599/what-does-minikube-docker-env-mean]
-eval $(minikube docker-env)
+eval $(minikube -p 42services docker-env)
 
 echo ""
 
@@ -134,7 +134,7 @@ echo ""
 # METALLB 
 #### ADD TO README [https://metallb.universe.tf]
 #-------------------------------------------------------
-echo -e "${green}MetalLB${white}"
+echo -e "${salmon}MetalLB${white}"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 sleep 1 && echo "${white}"
 
@@ -170,12 +170,13 @@ kubectl apply -f srcs/mysql/mysql.yaml
 kubectl apply -f srcs/ftps/ftps.yaml
 kubectl apply -f srcs/phpmyadmin/phpmyadmin.yaml
 kubectl apply -f srcs/wordpress/wordpress.yaml
-#kubectl apply -f ../services/grafana/grafana.yaml
-#kubectl apply -f ../services/influxdb/influxdb.yaml
-#kubectl apply -f ../services/telegraf/telegraf.yaml
+kubectl apply -f srcs/grafana/grafana.yaml
+kubectl apply -f srcs/influxdb/influxdb.yaml
+kubectl apply -f srcs/telegraf/telegraf.yaml
 
 
 ## FINISH
 minikube ip
 kubectl get svc
-minikube delete 2> /dev/null
+#minikube dashboard
+#minikube delete 2> /dev/null

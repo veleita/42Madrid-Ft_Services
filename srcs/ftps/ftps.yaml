@@ -11,11 +11,9 @@ spec:
   - name: ftps
     protocol: TCP
     port: 21
-    nodePort: 21
   - name: ftps-pasv
     protocol: TCP
     port: 32121
-    nodePort: 32121
   type: LoadBalancer
 ---
 apiVersion: apps/v1

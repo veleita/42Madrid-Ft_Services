@@ -14,21 +14,6 @@ spec:
     tier: frontend
   type: LoadBalancer
 ---
-# OPTIONAL
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: wordpress-storage
-  labels:
-    app: wordpress
-spec:
-  storageClassName: wordpress
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
----
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
@@ -49,15 +34,8 @@ spec:
         app: wordpress
         tier: frontend
     spec:
-      volumes:
-      - name: wordpress-persistent-storage
-        persistentVolumeClaim:
-          claimName: wordpress-storage
       containers:
       - name: wordpress
         image: mzomeno-wordpress
         ports:
         - containerPort: 5050
-          volumeMounts:
-        - name: wordpress-persistent-storage
-          mountPath: /var/www/html

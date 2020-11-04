@@ -8,7 +8,6 @@ spec:
   ports:
     - name: phpmyadmin
       port: 5000
-      nodePort: 5000
   selector:
     app: phpmyadmin
   type: NodePort
