@@ -31,6 +31,6 @@ spec:
         app: grafana
     spec:
       containers:
-        - name: grafana
+      - name: grafana
         image: mzomeno-grafana
         imagePullPolicy: Never

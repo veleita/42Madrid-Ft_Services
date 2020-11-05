@@ -39,3 +39,4 @@ spec:
         image: mzomeno-wordpress
         ports:
         - containerPort: 5050
+        imagePullPolicy: Never

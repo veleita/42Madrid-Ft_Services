@@ -6,7 +6,7 @@ metadata:
   name: influxdb
 spec:
   ports:
-    - name: http
+  - name: http
     port: 8086
     protocol: TCP
   selector:

@@ -10,8 +10,7 @@ spec:
       port: 5000
   selector:
     app: phpmyadmin
-  type: NodePort
-  # type: LoadBalancer
+  type: LoadBalancer
   # LoadBalancerIP:
 ---
 apiVersion: apps/v1
@@ -35,4 +34,4 @@ spec:
           image: mzomeno-phpmyadmin
           imagePullPolicy: Never
           ports:
-            - containerPort: 500
+            - containerPort: 5000

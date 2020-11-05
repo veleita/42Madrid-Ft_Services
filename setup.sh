@@ -31,37 +31,37 @@ export SETUP_PATH=$(pwd)
 # --------- #
 
 # A little presentation
-echo "${white}Hey there! 👋" && sleep 0.5
-echo "	Welcome to" && sleep 0.5
-echo "		mzomeno-'s" && sleep 0.5
-echo "${blue}			🚢FT_SERVICES🐳"
-echo -n "		"
-	for i in {1..30}; do sleep 0.02 && echo -n "-"; done
-sleep 0.5 && echo ""
-
-echo "${white}We are about to install the following set of services:"
-echo "	=> ${red}FTPS${white}"
-echo "	=> ${green}Nginx${white} with SSH"
-echo "	=> ${blue}Wordpress${white} with Mariadb and phpmyadmin"
-echo "	=> ${lilac}Influxdb${white} with Telegraf and Grafana"
-echo "${white}into a ${turquoise}Kubernetes ${white}single-node cluster provided by ${turquoise}Minikube"
-echo ""
-
-read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
-echo ""
-
-# Disclaimers
-echo "⚠️  ${white}This project has only been tested on ${yellow}darwin18.0${white} and will be set up to run"
-echo "on a 42Network environment."
-echo ""
-echo "📦 It will require you to have ${blue}Docker${white} and ${ocean}VirtualBox${white} installed on your machine."
-echo ""
-echo "💿 Please make sure that you have enough free space on your disk (${salmon}around 2G${white}"
-echo "should be fine) so that the installation completes correctly"
-echo ""
-
-read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
-echo ""
+#echo "${white}Hey there! 👋" && sleep 0.5
+#echo "	Welcome to" && sleep 0.5
+#echo "		mzomeno-'s" && sleep 0.5
+#echo "${blue}			🚢FT_SERVICES🐳"
+#echo -n "		"
+#	for i in {1..30}; do sleep 0.02 && echo -n "-"; done
+#sleep 0.5 && echo ""
+#
+#echo "${white}We are about to install the following set of services:"
+#echo "	=> ${red}FTPS${white}"
+#echo "	=> ${green}Nginx${white} with SSH"
+#echo "	=> ${blue}Wordpress${white} with Mariadb and phpmyadmin"
+#echo "	=> ${lilac}Influxdb${white} with Telegraf and Grafana"
+#echo "${white}into a ${turquoise}Kubernetes ${white}single-node cluster provided by ${turquoise}Minikube"
+#echo ""
+#
+#read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
+#echo ""
+#
+## Disclaimers
+#echo "⚠️  ${white}This project has only been tested on ${yellow}darwin18.0${white} and will be set up to run"
+#echo "on a 42Network environment."
+#echo ""
+#echo "📦 It will require you to have ${blue}Docker${white} and ${ocean}VirtualBox${white} installed on your machine."
+#echo ""
+#echo "💿 Please make sure that you have enough free space on your disk (${salmon}around 2G${white}"
+#echo "should be fine) so that the installation completes correctly"
+#echo ""
+#
+#read -n1 -p "${grey}[ Press ENTER to proceed ]" enter
+#echo ""
 
 
 #   SETUP   #
@@ -77,7 +77,8 @@ if [ ! -d /Applications/VirtualBox.app ] && \
 		exit 0
 fi
 
-./init_docker.sh	
+#./init_docker.sh	
+open -g -a Docker
 #	if [ ! -d /Applications/Docker.app ] && \
 #		[ ! -d ~/Applications/Docker.app ] && \
 #		[ ! -d /goinfre/$USER/docker ]; then
@@ -115,18 +116,23 @@ fi
 
 
 ## MINIKUBE
-echo -e "${grey}Minikube"
+echo -e "${turquoise}Minikube"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 echo "${white}"
 
 # Restart "42services" cluster on VirtualBox driver
+kubectl delete deployments --all
+kubectl delete svc --all
+kubectl delete pvc --all
+kubectl delete pv --all
 minikube config set profile 42services
 minikube config set driver virtualbox
+minikube delete
 minikube start
 
 # Import Docker daemon to the cluster
 #### ADD TO README [https://stackoverflow.com/questions/52310599/what-does-minikube-docker-env-mean]
-eval $(minikube -p 42services docker-env)
+eval $(minikube docker-env)
 
 echo ""
 
@@ -155,10 +161,13 @@ echo -e "${blue}Docker containers"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 sleep 1 && echo "${white}"
 docker build -t mzomeno-nginx srcs/nginx/
-docker build -t mzomeno-mysql srcs/mysql/
 docker build -t mzomeno-ftps srcs/ftps/
-docker build -t mzomeno-wordpress srcs/wordpress/
 docker build -t mzomeno-phpmyadmin srcs/phpmyadmin/
+docker build -t mzomeno-wordpress srcs/wordpress/
+docker build -t mzomeno-mysql srcs/mysql/
+docker build -t mzomeno-grafana srcs/grafana/
+docker build -t mzomeno-influxdb srcs/influxdb/
+docker build -t mzomeno-telegraf srcs/telegraf/
 
 
 ## KUBERNETES
@@ -166,17 +175,21 @@ echo -e "${turquoise}Kubernetes objects"
 for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 sleep 1 && echo "${white}"
 kubectl apply -f srcs/nginx/nginx.yaml
-kubectl apply -f srcs/mysql/mysql.yaml
 kubectl apply -f srcs/ftps/ftps.yaml
 kubectl apply -f srcs/phpmyadmin/phpmyadmin.yaml
 kubectl apply -f srcs/wordpress/wordpress.yaml
+kubectl apply -f srcs/mysql/mysql.yaml
+kubectl apply -f srcs/volumes/mysql-pv.yaml
 kubectl apply -f srcs/grafana/grafana.yaml
 kubectl apply -f srcs/influxdb/influxdb.yaml
+kubectl apply -f srcs/volumes/influxdb-pv.yaml
 kubectl apply -f srcs/telegraf/telegraf.yaml
 
 
 ## FINISH
+#docker images
 minikube ip
-kubectl get svc
-#minikube dashboard
+#kubectl get svc
+kubectl get pods
+minikube dashboard
 #minikube delete 2> /dev/null
