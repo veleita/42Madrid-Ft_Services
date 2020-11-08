@@ -121,10 +121,10 @@ for i in {1..28}; do sleep 0.02 && echo -n "-"; done
 echo "${white}"
 
 # Restart "42services" cluster on VirtualBox driver
-kubectl delete deployments --all
-kubectl delete svc --all
-kubectl delete pvc --all
-kubectl delete pv --all
+#kubectl delete deployments --all
+#kubectl delete svc --all
+#kubectl delete pvc --all
+#kubectl delete pv --all
 minikube config set profile 42services
 minikube config set driver virtualbox
 minikube delete
@@ -189,7 +189,6 @@ kubectl apply -f srcs/telegraf/telegraf.yaml
 ## FINISH
 #docker images
 minikube ip
-#kubectl get svc
+kubectl get svc
 kubectl get pods
 minikube dashboard
-#minikube delete 2> /dev/null
